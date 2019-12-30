@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.stream.Stream;
 
 @Service
@@ -51,10 +53,13 @@ public class GraphQLService {
         loadDataIntoHSQL();
 
         //Get the graphql file
-        File file = resource.getFile();
+        // TODO BUGFIX WHEN PUBLISH TO HEROKU FILE NOT FOUND IF GETFILE METHOD IS USE
+        InputStream file = resource.getInputStream();
+        final InputStreamReader streamReader = new InputStreamReader(file);
+
 
         //Parse SchemaF
-        TypeDefinitionRegistry typeDefinitionRegistry = new SchemaParser().parse(file);
+        TypeDefinitionRegistry typeDefinitionRegistry = new SchemaParser().parse(streamReader);
         RuntimeWiring runtimeWiring = buildRuntimeWiring();
         GraphQLSchema graphQLSchema = new SchemaGenerator().makeExecutableSchema(typeDefinitionRegistry, runtimeWiring);
         graphQL = GraphQL.newGraphQL(graphQLSchema).build();
